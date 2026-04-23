@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌿 EcoHero - Petualangan Memilah Sampah</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #2ecc71;
+    --dark-green: #1a8a4a;
+    --blue: #3498db;
+    --orange: #e67e22;
+    --red: #e74c3c;
+    --yellow: #f1c40f;
+    --purple: #9b59b6;
+    --bg: #0d1f0f;
+    --panel: #132b16;
+    --card: #1a3a1d;
+    --text: #e8f5e9;
+    --muted: #81c784;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(46,204,113,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(52,152,219,0.06) 0%, transparent 60%);
+  }
+
+  /* ===== SCREENS ===== */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ===== START SCREEN ===== */
+  #start-screen {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .floating-emoji {
+    position: absolute;
+    font-size: 2rem;
+    animation: floatUp 8s linear infinite;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  @keyframes floatUp {
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.3; }
+    90% { opacity: 0.3; }
+    100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+  }
+
+  .logo-wrap { margin-bottom: 10px; }
+  .logo-icon { font-size: 5rem; display: block; animation: bounce 2s ease-in-out infinite; }
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+
+  h1.game-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2.5rem, 8vw, 4rem);
+    color: var(--green);
+    text-shadow: 0 0 30px rgba(46,204,113,0.5);
+    line-height: 1.1;
+    margin-bottom: 5px;
+  }
+
+  .game-subtitle {
+    font-size: 1.1rem;
+    color: var(--muted);
+    margin-bottom: 30px;
+    font-weight: 600;
+  }
+
+  .info-cards {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .info-card {
+    background: var(--card);
+    border: 1px solid rgba(46,204,113,0.2);
+    border-radius: 16px;
+    padding: 15px 20px;
+    min-width: 120px;
+    text-align: center;
+  }
+
+  .info-card .emoji { font-size: 1.8rem; display: block; margin-bottom: 5px; }
+  .info-card .label { font-size: 0.75rem; color: var(--muted); font-weight: 600; }
+  .info-card .value { font-size: 1rem; font-weight: 800; color: var(--text); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--green), var(--dark-green));
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 16px 48px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.4rem;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(46,204,113,0.4);
+    transition: all 0.2s;
+    letter-spacing: 1px;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(46,204,113,0.5);
+  }
+
+  .btn-primary:active { transform: translateY(0); }
+
+  .highscore-display {
+    margin-top: 20px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .highscore-display span { color: var(--yellow); font-size: 1.1rem; }
+
+  /* ===== HUD ===== */
+  #hud {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    background: var(--panel);
+    border-bottom: 2px solid rgba(46,204,113,0.2);
+    flex-wrap: wrap;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .hud-stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+  }
+
+  .hud-stat .icon { font-size: 1.2rem; }
+  .hud-stat .val { font-size: 1.1rem; font-family: 'Fredoka One', cursive; }
+  .hud-stat.score .val { color: var(--yellow); }
+  .hud-stat.lives .val { color: var(--red); }
+  .hud-stat.level-stat .val { color: var(--green); }
+  .hud-stat.combo .val { color: var(--purple); }
+
+  #timer-bar-wrap {
+    width: 100%;
+    height: 8px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    flex-basis: 100%;
+    order: 10;
+  }
+
+  #timer-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green), #a8ff78);
+    border-radius: 4px;
+    transition: width 0.3s linear, background 0.3s;
+  }
+
+  /* ===== GAME AREA ===== */
+  #game-screen {
+    flex: 1;
+    display: none;
+    flex-direction: column;
+  }
+  #game-screen.active { display: flex; }
+
+  #game-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+    min-height: 300px;
+  }
+
+  /* Falling items */
+  .trash-item {
+    position: absolute;
+    top: -80px;
+    font-size: 2.5rem;
+    cursor: grab;
+    user-select: none;
+    transition: transform 0.1s;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+    z-index: 10;
+    animation: wobble 2s ease-in-out infinite;
+  }
+
+  @keyframes wobble {
+    0%,100% { transform: rotate(-5deg) scale(1); }
+    50% { transform: rotate(5deg) scale(1.05); }
+  }
+
+  .trash-item:hover { transform: scale(1.2) !important; }
+  .trash-item.dragging { opacity: 0.8; cursor: grabbing; z-index: 100; animation: none; }
+
+  /* ===== BINS ===== */
+  #bins-area {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 15px 10px;
+    background: var(--panel);
+    border-top: 2px solid rgba(46,204,113,0.2);
+    flex-wrap: wrap;
+  }
+
+  .bin {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .bin:hover { transform: scale(1.05); }
+
+  .bin-body {
+    width: 80px;
+    height: 90px;
+    border-radius: 8px 8px 12px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    border: 3px solid rgba(255,255,255,0.15);
+    position: relative;
+    transition: all 0.2s;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  }
+
+  .bin-body::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -5px;
+    right: -5px;
+    height: 14px;
+    border-radius: 4px;
+    background: inherit;
+    filter: brightness(1.3);
+    border: 3px solid rgba(255,255,255,0.15);
+  }
+
+  .bin[data-type="organik"] .bin-body { background: linear-gradient(180deg, #2d6a1f, #1e4a14); border-color: var(--green); }
+  .bin[data-type="anorganik"] .bin-body { background: linear-gradient(180deg, #1a4a7a, #0d2d4f); border-color: var(--blue); }
+  .bin[data-type="b3"] .bin-body { background: linear-gradient(180deg, #7a1a1a, #4f0d0d); border-color: var(--red); }
+  .bin[data-type="kertas"] .bin-body { background: linear-gradient(180deg, #7a5a1a, #4f3a0d); border-color: var(--orange); }
+
+  .bin.highlight .bin-body {
+    transform: scale(1.1);
+    box-shadow: 0 0 25px currentColor;
+    border-width: 4px;
+  }
+
+  .bin[data-type="organik"].highlight .bin-body { box-shadow: 0 0 25px var(--green); }
+  .bin[data-type="anorganik"].highlight .bin-body { box-shadow: 0 0 25px var(--blue); }
+  .bin[data-type="b3"].highlight .bin-body { box-shadow: 0 0 25px var(--red); }
+  .bin[data-type="kertas"].highlight .bin-body { box-shadow: 0 0 25px var(--orange); }
+
+  .bin-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    max-width: 80px;
+  }
+
+  .bin[data-type="organik"] .bin-label { color: var(--green); }
+  .bin[data-type="anorganik"] .bin-label { color: var(--blue); }
+  .bin[data-type="b3"] .bin-label { color: var(--red); }
+  .bin[data-type="kertas"] .bin-label { color: var(--orange); }
+
+  /* ===== FEEDBACK ===== */
+  .feedback-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: var(--card);
+    border-radius: 20px;
+    padding: 20px 30px;
+    text-align: center;
+    z-index: 1000;
+    pointer-events: none;
+    border: 2px solid;
+    transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .feedback-popup.show {
+    transform: translate(-50%, -50%) scale(1);
+    animation: popFeedback 0.8s forwards;
+  }
+
+  @keyframes popFeedback {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+    40% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+    60% { transform: translate(-50%, -50%) scale(0.95); opacity: 1; }
+    75% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -55%) scale(0.8); opacity: 0; }
+  }
+
+  .feedback-popup.correct { border-color: var(--green); }
+  .feedback-popup.wrong { border-color: var(--red); }
+  .feedback-emoji { font-size: 2.5rem; display: block; }
+  .feedback-text { font-family: 'Fredoka One', cursive; font-size: 1.3rem; margin-top: 5px; }
+  .feedback-popup.correct .feedback-text { color: var(--green); }
+  .feedback-popup.wrong .feedback-text { color: var(--red); }
+  .feedback-sub { font-size: 0.8rem; color: var(--muted); margin-top: 3px; }
+
+  /* Score pop */
+  .score-pop {
+    position: fixed;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.5rem;
+    pointer-events: none;
+    z-index: 999;
+    animation: scoreFloat 1s forwards;
+  }
+  .score-pop.positive { color: var(--yellow); }
+  .score-pop.negative { color: var(--red); }
+
+  @keyframes scoreFloat {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-60px); }
+  }
+
+  /* ===== LEVEL UP ===== */
+  #level-up-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+  #level-up-overlay.show { display: flex; }
+  .level-up-title { font-family: 'Fredoka One', cursive; font-size: 3rem; color: var(--yellow); text-shadow: 0 0 40px rgba(241,196,15,0.7); animation: pulse 0.5s ease-in-out infinite alternate; }
+  @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
+  .level-up-sub { font-size: 1.1rem; color: var(--muted); }
+  .level-up-info { font-size: 2rem; }
+
+  /* ===== GAME OVER ===== */
+  #gameover-screen {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 30px 20px;
+    gap: 20px;
+    flex-direction: column;
+  }
+
+  .gameover-icon { font-size: 5rem; animation: shake 0.5s ease-in-out; }
+  @keyframes shake {
+    0%,100% { transform: rotate(0); }
+    25% { transform: rotate(-10deg); }
+    75% { transform: rotate(10deg); }
+  }
+
+  .gameover-title { font-family: 'Fredoka One', cursive; font-size: 2.5rem; color: var(--red); }
+  .final-score-card {
+    background: var(--card);
+    border: 1px solid rgba(46,204,113,0.2);
+    border-radius: 20px;
+    padding: 25px 40px;
+    width: 100%;
+    max-width: 350px;
+  }
+
+  .final-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .final-row:last-child { border-bottom: none; }
+  .final-row .fl { color: var(--muted); font-size: 0.9rem; }
+  .final-row .fv { font-family: 'Fredoka One', cursive; font-size: 1.2rem; color: var(--yellow); }
+
+  .new-record {
+    color: var(--yellow);
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    animation: pulse 0.5s ease-in-out infinite alternate;
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--green);
+    border: 2px solid var(--green);
+    border-radius: 50px;
+    padding: 12px 36px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { background: rgba(46,204,113,0.1); transform: translateY(-2px); }
+
+  .btn-group { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+  /* ===== PARTICLES ===== */
+  .particle {
+    position: fixed;
+    pointer-events: none;
+    z-index: 999;
+    animation: particleFly 0.8s forwards;
+    font-size: 1.2rem;
+  }
+  @keyframes particleFly {
+    0% { opacity: 1; transform: translate(0, 0) scale(1); }
+    100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); }
+  }
+
+  /* ===== TUTORIAL ===== */
+  #tutorial-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    z-index: 600;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  #tutorial-overlay.show { display: flex; }
+  .tutorial-box {
+    background: var(--card);
+    border: 2px solid rgba(46,204,113,0.3);
+    border-radius: 24px;
+    padding: 30px;
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+  }
+  .tutorial-title { font-family: 'Fredoka One', cursive; font-size: 1.8rem; color: var(--green); margin-bottom: 20px; }
+  .tutorial-bins {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .tutorial-bin {
+    background: var(--panel);
+    border-radius: 12px;
+    padding: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .tutorial-bin .t-icon { font-size: 1.5rem; }
+  .tutorial-bin .t-name { font-weight: 800; font-size: 0.85rem; margin: 4px 0; }
+  .tutorial-bin .t-examples { font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
+  .tutorial-bin[data-t="organik"] .t-name { color: var(--green); }
+  .tutorial-bin[data-t="anorganik"] .t-name { color: var(--blue); }
+  .tutorial-bin[data-t="b3"] .t-name { color: var(--red); }
+  .tutorial-bin[data-t="kertas"] .t-name { color: var(--orange); }
+  .tutorial-tip { font-size: 0.85rem; color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
+
+  /* Mobile tap zone */
+  .trash-item.tap-mode { cursor: pointer; }
+
+  @media (max-width: 480px) {
+    .bin-body { width: 65px; height: 75px; font-size: 1.6rem; }
+    .bin-label { font-size: 0.55rem; max-width: 65px; }
+    .trash-item { font-size: 2rem; }
+    .info-cards { gap: 8px; }
+    .info-card { padding: 10px 12px; min-width: 90px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== START SCREEN ===== -->
+<div class="screen active" id="start-screen">
+  <!-- Floating BG emojis -->
+  <div class="floating-emoji" style="left:5%;animation-delay:0s;">🍃</div>
+  <div class="floating-emoji" style="left:20%;animation-delay:1.5s;">♻️</div>
+  <div class="floating-emoji" style="left:40%;animation-delay:3s;">🌿</div>
+  <div class="floating-emoji" style="left:60%;animation-delay:0.8s;">🌱</div>
+  <div class="floating-emoji" style="left:75%;animation-delay:2s;">🍂</div>
+  <div class="floating-emoji" style="left:90%;animation-delay:4s;">✨</div>
+
+  <div class="logo-wrap">
+    <span class="logo-icon">🌍</span>
+  </div>
+  <h1 class="game-title">EcoHero</h1>
+  <p class="game-subtitle">🎮 Petualangan Memilah Sampah</p>
+
+  <div class="info-cards">
+    <div class="info-card">
+      <span class="emoji">🗑️</span>
+      <span class="label">Jenis Sampah</span>
+      <span class="value">4 Kategori</span>
+    </div>
+    <div class="info-card">
+      <span class="emoji">⏱️</span>
+      <span class="label">Per Ronde</span>
+      <span class="value">30 Detik</span>
+    </div>
+    <div class="info-card">
+      <span class="emoji">❤️</span>
+      <span class="label">Nyawa</span>
+      <span class="value">3 Nyawa</span>
+    </div>
+  </div>
+
+  <button class="btn-primary" onclick="showTutorial()">🚀 Mulai Bermain</button>
+  <div class="highscore-display">Skor Tertinggi: <span id="hs-display">0</span></div>
+</div>
+
+<!-- ===== TUTORIAL OVERLAY ===== -->
+<div id="tutorial-overlay">
+  <div class="tutorial-box">
+    <div class="tutorial-title">📚 Cara Memilah Sampah</div>
+    <div class="tutorial-bins">
+      <div class="tutorial-bin" data-t="organik">
+        <div class="t-icon">🌿</div>
+        <div class="t-name">ORGANIK</div>
+        <div class="t-examples">Sisa makanan, daun, buah busuk, kulit telur</div>
+      </div>
+      <div class="tutorial-bin" data-t="anorganik">
+        <div class="t-icon">🔵</div>
+        <div class="t-name">ANORGANIK</div>
+        <div class="t-examples">Plastik, kaca, kaleng, botol, styrofoam</div>
+      </div>
+      <div class="tutorial-bin" data-t="b3">
+        <div class="t-icon">⚠️</div>
+        <div class="t-name">B3 (BERBAHAYA)</div>
+        <div class="t-examples">Baterai, oli, obat kadaluarsa, cat, pestisida</div>
+      </div>
+      <div class="tutorial-bin" data-t="kertas">
+        <div class="t-icon">📄</div>
+        <div class="t-name">KERTAS</div>
+        <div class="t-examples">Koran, buku, kardus, tisu, dus makanan</div>
+      </div>
+    </div>
+    <p class="tutorial-tip">💡 <strong>Klik</strong> sampah yang jatuh lalu <strong>klik tempat sampah</strong> yang sesuai. Atau langsung klik <strong>tempat sampah</strong> saat sampah jatuh!</p>
+    <button class="btn-primary" onclick="startGame()">✅ Siap! Mulai</button>
+  </div>
+</div>
+
+<!-- ===== GAME SCREEN ===== -->
+<div class="screen" id="game-screen">
+  <div id="hud">
+    <div class="hud-stat score">
+      <span class="icon">⭐</span>
+      <span class="val" id="score-display">0</span>
+    </div>
+    <div class="hud-stat level-stat">
+      <span class="icon">🏆</span>
+      <span class="val" id="level-display">1</span>
+    </div>
+    <div class="hud-stat combo">
+      <span class="icon">🔥</span>
+      <span class="val" id="combo-display">x1</span>
+    </div>
+    <div class="hud-stat lives">
+      <span id="lives-display">❤️❤️❤️</span>
+    </div>
+    <div id="timer-bar-wrap">
+      <div id="timer-bar" style="width:100%"></div>
+    </div>
+  </div>
+
+  <div id="game-area"></div>
+
+  <div id="bins-area">
+    <div class="bin" data-type="organik" onclick="handleBinClick('organik')">
+      <div class="bin-body">🌿</div>
+      <div class="bin-label">🌿 Organik</div>
+    </div>
+    <div class="bin" data-type="anorganik" onclick="handleBinClick('anorganik')">
+      <div class="bin-body">🔵</div>
+      <div class="bin-label">🔵 Anorganik</div>
+    </div>
+    <div class="bin" data-type="b3" onclick="handleBinClick('b3')">
+      <div class="bin-body">⚠️</div>
+      <div class="bin-label">⚠️ B3</div>
+    </div>
+    <div class="bin" data-type="kertas" onclick="handleBinClick('kertas')">
+      <div class="bin-body">📄</div>
+      <div class="bin-label">📄 Kertas</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== LEVEL UP OVERLAY ===== -->
+<div id="level-up-overlay">
+  <div class="level-up-title">🎉 LEVEL UP!</div>
+  <div class="level-up-info" id="level-up-num"></div>
+  <div class="level-up-sub">Sampah semakin cepat jatuh!</div>
+</div>
+
+<!-- ===== GAME OVER SCREEN ===== -->
+<div class="screen" id="gameover-screen">
+  <div class="gameover-icon">😢</div>
+  <div class="gameover-title">Game Over</div>
+  <div class="final-score-card">
+    <div class="final-row">
+      <span class="fl">⭐ Skor Akhir</span>
+      <span class="fv" id="final-score">0</span>
+    </div>
+    <div class="final-row">
+      <span class="fl">🏆 Level Dicapai</span>
+      <span class="fv" id="final-level">1</span>
+    </div>
+    <div class="final-row">
+      <span class="fl">✅ Benar</span>
+      <span class="fv" id="final-correct">0</span>
+    </div>
+    <div class="final-row">
+      <span class="fl">❌ Salah</span>
+      <span class="fv" id="final-wrong">0</span>
+    </div>
+    <div class="final-row">
+      <span class="fl">🏅 Skor Tertinggi</span>
+      <span class="fv" id="final-hs">0</span>
+    </div>
+  </div>
+  <div class="new-record" id="new-record" style="display:none">🌟 Rekor Baru! 🌟</div>
+  <div class="btn-group">
+    <button class="btn-primary" onclick="startGame()">🔄 Main Lagi</button>
+    <button class="btn-secondary" onclick="goHome()">🏠 Menu</button>
+  </div>
+</div>
+
+<!-- ===== FEEDBACK POPUP ===== -->
+<div class="feedback-popup" id="feedback">
+  <span class="feedback-emoji" id="fb-emoji">✅</span>
+  <div class="feedback-text" id="fb-text">Benar!</div>
+  <div class="feedback-sub" id="fb-sub"></div>
+</div>
+
+<script>
+// ===== DATA =====
+const TRASH_ITEMS = [
+  // Organik
+  { emoji: '🍎', name: 'Apel busuk', type: 'organik' },
+  { emoji: '🍌', name: 'Kulit pisang', type: 'organik' },
+  { emoji: '🥗', name: 'Sisa salad', type: 'organik' },
+  { emoji: '🍂', name: 'Daun kering', type: 'organik' },
+  { emoji: '🥚', name: 'Kulit telur', type: 'organik' },
+  { emoji: '🌽', name: 'Tongkol jagung', type: 'organik' },
+  { emoji: '🍖', name: 'Tulang ayam', type: 'organik' },
+  { emoji: '🥬', name: 'Sayuran busuk', type: 'organik' },
+  { emoji: '☕', name: 'Ampas kopi', type: 'organik' },
+  { emoji: '🍞', name: 'Roti basi', type: 'organik' },
+  // Anorganik
+  { emoji: '🧴', name: 'Botol plastik', type: 'anorganik' },
+  { emoji: '🥤', name: 'Gelas plastik', type: 'anorganik' },
+  { emoji: '🛍️', name: 'Kantong kresek', type: 'anorganik' },
+  { emoji: '🥫', name: 'Kaleng sarden', type: 'anorganik' },
+  { emoji: '🍾', name: 'Botol kaca', type: 'anorganik' },
+  { emoji: '💡', name: 'Bohlam mati', type: 'anorganik' },
+  { emoji: '🪣', name: 'Ember plastik', type: 'anorganik' },
+  { emoji: '📦', name: 'Styrofoam', type: 'anorganik' },
+  // B3
+  { emoji: '🔋', name: 'Baterai bekas', type: 'b3' },
+  { emoji: '💊', name: 'Obat kadaluarsa', type: 'b3' },
+  { emoji: '🖨️', name: 'Tinta printer', type: 'b3' },
+  { emoji: '🧪', name: 'Cairan kimia', type: 'b3' },
+  { emoji: '🪫', name: 'Baterai HP', type: 'b3' },
+  { emoji: '🚬', name: 'Puntung rokok', type: 'b3' },
+  // Kertas
+  { emoji: '📰', name: 'Koran bekas', type: 'kertas' },
+  { emoji: '📚', name: 'Buku lama', type: 'kertas' },
+  { emoji: '🗒️', name: 'Buku catatan', type: 'kertas' },
+  { emoji: '📋', name: 'Kertas HVS', type: 'kertas' },
+  { emoji: '🗃️', name: 'Kardus', type: 'kertas' },
+  { emoji: '🧻', name: 'Tisu bekas', type: 'kertas' },
+  { emoji: '✉️', name: 'Amplop surat', type: 'kertas' },
+  { emoji: '🖨️', name: 'Kertas print', type: 'kertas' },
+];
+
+const CORRECT_MSGS = ['Kerja Bagus!', 'Tepat Sekali!', 'Hebat!', 'Mantap!', 'Luar Biasa!', 'Top!'];
+const WRONG_MSGS = ['Salah Tempat!', 'Coba Lagi!', 'Kurang Tepat!', 'Perhatikan!'];
+
+// ===== STATE =====
+let score = 0, lives = 3, level = 1, combo = 1;
+let timerInterval = null, spawnInterval = null;
+let timeLeft = 30;
+let totalCorrect = 0, totalWrong = 0;
+let activeItems = [];
+let selectedItem = null;
+let isGameRunning = false;
+let highscore = parseInt(localStorage.getItem('ecohero_hs') || '0');
+
+// ===== INIT =====
+document.getElementById('hs-display').textContent = highscore;
+
+function showTutorial() {
+  document.getElementById('tutorial-overlay').classList.add('show');
+}
+
+function goHome() {
+  stopGame();
+  showScreen('start-screen');
+  document.getElementById('hs-display').textContent = highscore;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ===== GAME START =====
+function startGame() {
+  document.getElementById('tutorial-overlay').classList.remove('show');
+  stopGame();
+
+  score = 0; lives = 3; level = 1; combo = 1;
+  totalCorrect = 0; totalWrong = 0;
+  timeLeft = 30;
+  selectedItem = null;
+  activeItems = [];
+  clearGameArea();
+  updateHUD();
+  isGameRunning = true;
+
+  showScreen('game-screen');
+  startTimer();
+  scheduleSpawn();
+}
+
+function stopGame() {
+  isGameRunning = false;
+  clearInterval(timerInterval);
+  clearInterval(spawnInterval);
+  timerInterval = null;
+  spawnInterval = null;
+  clearGameArea();
+  activeItems = [];
+  selectedItem = null;
+  clearBinHighlights();
+}
+
+function clearGameArea() {
+  document.getElementById('game-area').innerHTML = '';
+}
+
+// ===== TIMER =====
+function startTimer() {
+  timeLeft = Math.max(15, 30 - (level - 1) * 2);
+  updateTimerBar();
+
+  timerInterval = setInterval(() => {
+    if (!isGameRunning) return;
+    timeLeft--;
+    updateTimerBar();
+    if (timeLeft <= 0) {
+      nextLevel();
+    }
+  }, 1000);
+}
+
+function updateTimerBar() {
+  const maxTime = Math.max(15, 30 - (level - 1) * 2);
+  const pct = (timeLeft / maxTime) * 100;
+  const bar = document.getElementById('timer-bar');
+  bar.style.width = pct + '%';
+  if (pct < 30) bar.style.background = 'linear-gradient(90deg, #e74c3c, #ff6b6b)';
+  else if (pct < 60) bar.style.background = 'linear-gradient(90deg, #f39c12, #f1c40f)';
+  else bar.style.background = 'linear-gradient(90deg, #2ecc71, #a8ff78)';
+}
+
+function nextLevel() {
+  level++;
+  combo = 1;
+  clearInterval(timerInterval);
+  clearInterval(spawnInterval);
+  clearGameArea();
+  activeItems = [];
+  selectedItem = null;
+
+  const overlay = document.getElementById('level-up-overlay');
+  document.getElementById('level-up-num').textContent = `Level ${level} 🚀`;
+  overlay.classList.add('show');
+
+  setTimeout(() => {
+    overlay.classList.remove('show');
+    if (isGameRunning) {
+      updateHUD();
+      startTimer();
+      scheduleSpawn();
+    }
+  }, 2000);
+}
+
+// ===== SPAWNING =====
+function scheduleSpawn() {
+  const baseInterval = Math.max(800, 2000 - (level - 1) * 150);
+  spawnInterval = setInterval(() => {
+    if (!isGameRunning) return;
+    spawnTrashItem();
+  }, baseInterval);
+  // Spawn one immediately
+  setTimeout(spawnTrashItem, 200);
+}
+
+function spawnTrashItem() {
+  if (!isGameRunning) return;
+  const gameArea = document.getElementById('game-area');
+  const areaW = gameArea.offsetWidth;
+
+  const item = TRASH_ITEMS[Math.floor(Math.random() * TRASH_ITEMS.length)];
+  const id = 'item-' + Date.now() + Math.random();
+
+  const el = document.createElement('div');
+  el.className = 'trash-item';
+  el.textContent = item.emoji;
+  el.id = id;
+  el.title = item.name;
+  el.dataset.type = item.type;
+  el.dataset.name = item.name;
+
+  const xPos = 20 + Math.random() * (areaW - 80);
+  el.style.left = xPos + 'px';
+  el.style.top = '-70px';
+
+  gameArea.appendChild(el);
+
+  const speed = Math.max(1.5, 4 - (level - 1) * 0.3);
+  const data = { el, type: item.type, name: item.name, id, y: -70, speed, missed: false };
+  activeItems.push(data);
+
+  el.addEventListener('click', () => selectItem(data));
+  el.addEventListener('touchstart', (e) => { e.preventDefault(); selectItem(data); }, { passive: false });
+
+  animateItem(data);
+}
+
+function animateItem(data) {
+  if (!isGameRunning || data.missed) return;
+  const gameArea = document.getElementById('game-area');
+  const areaH = gameArea.offsetHeight;
+
+  data.y += data.speed;
+  if (data.el.parentNode) data.el.style.top = data.y + 'px';
+
+  if (data.y > areaH + 20) {
+    missedItem(data);
+    return;
+  }
+
+  requestAnimationFrame(() => animateItem(data));
+}
+
+function missedItem(data) {
+  if (data.missed) return;
+  data.missed = true;
+  removeItem(data);
+
+  // Only penalize if it wasn't sorted correctly
+  loseLife();
+  combo = 1;
+  updateHUD();
+  showFeedback('wrong', '💨', 'Sampah terlewat!', data.name + ' tidak dipilah');
+}
+
+function removeItem(data) {
+  data.missed = true;
+  if (data.el && data.el.parentNode) data.el.parentNode.removeChild(data.el);
+  activeItems = activeItems.filter(i => i.id !== data.id);
+  if (selectedItem && selectedItem.id === data.id) {
+    selectedItem = null;
+    clearBinHighlights();
+  }
+}
+
+// ===== SELECTION + SORTING =====
+function selectItem(data) {
+  if (data.missed || !isGameRunning) return;
+
+  // Deselect previous
+  activeItems.forEach(i => i.el && i.el.classList.remove('dragging'));
+
+  selectedItem = data;
+  data.el.classList.add('dragging');
+
+  // Highlight bins
+  highlightBins(data.type);
+}
+
+function highlightBins(correctType) {
+  document.querySelectorAll('.bin').forEach(bin => {
+    bin.classList.remove('highlight');
+    if (bin.dataset.type === correctType) {
+      bin.classList.add('highlight');
+    }
+  });
+}
+
+function clearBinHighlights() {
+  document.querySelectorAll('.bin').forEach(bin => bin.classList.remove('highlight'));
+}
+
+function handleBinClick(binType) {
+  if (!isGameRunning) return;
+
+  if (!selectedItem) {
+    // Auto-select the topmost (lowest y) non-missed item
+    const visible = activeItems.filter(i => !i.missed);
+    if (visible.length === 0) return;
+    visible.sort((a, b) => b.y - a.y);
+    selectedItem = visible[0];
+    selectedItem.el.classList.add('dragging');
+  }
+
+  const item = selectedItem;
+  selectedItem = null;
+  clearBinHighlights();
+
+  if (!item || item.missed) return;
+
+  const isCorrect = (item.type === binType);
+
+  if (isCorrect) {
+    const pts = 10 * combo;
+    score += pts;
+    totalCorrect++;
+    combo = Math.min(combo + 1, 8);
+
+    const msg = CORRECT_MSGS[Math.floor(Math.random() * CORRECT_MSGS.length)];
+    showFeedback('correct', '✅', msg + (combo > 1 ? ` x${combo}!` : '!'), item.name + ' → ' + getBinName(binType));
+    showScorePop('+' + pts, item.el, true);
+    spawnParticles(item.el);
+  } else {
+    score = Math.max(0, score - 5);
+    totalWrong++;
+    combo = 1;
+    loseLife();
+
+    const msg = WRONG_MSGS[Math.floor(Math.random() * WRONG_MSGS.length)];
+    showFeedback('wrong', '❌', msg, item.name + ' bukan ' + getBinName(binType));
+    showScorePop('-5', item.el, false);
+  }
+
+  item.el.classList.remove('dragging');
+  removeItem(item);
+  updateHUD();
+}
+
+function getBinName(type) {
+  const names = { organik: 'Organik', anorganik: 'Anorganik', b3: 'B3', kertas: 'Kertas' };
+  return names[type] || type;
+}
+
+function loseLife() {
+  lives--;
+  updateHUD();
+  if (lives <= 0) {
+    endGame();
+  }
+}
+
+// ===== HUD UPDATE =====
+function updateHUD() {
+  document.getElementById('score-display').textContent = score;
+  document.getElementById('level-display').textContent = level;
+  document.getElementById('combo-display').textContent = 'x' + combo;
+
+  const hearts = ['', '❤️', '❤️❤️', '❤️❤️❤️'];
+  document.getElementById('lives-display').textContent = hearts[Math.max(0, Math.min(3, lives))];
+}
+
+// ===== FEEDBACK =====
+let feedbackTimeout = null;
+function showFeedback(type, emoji, text, sub) {
+  const el = document.getElementById('feedback');
+  document.getElementById('fb-emoji').textContent = emoji;
+  document.getElementById('fb-text').textContent = text;
+  document.getElementById('fb-sub').textContent = sub || '';
+  el.className = 'feedback-popup ' + type;
+  if (feedbackTimeout) clearTimeout(feedbackTimeout);
+  el.classList.add('show');
+  feedbackTimeout = setTimeout(() => el.classList.remove('show'), 900);
+}
+
+function showScorePop(text, refEl, positive) {
+  const pop = document.createElement('div');
+  pop.className = 'score-pop ' + (positive ? 'positive' : 'negative');
+  pop.textContent = text;
+  const rect = refEl ? refEl.getBoundingClientRect() : { left: window.innerWidth / 2, top: window.innerHeight / 2 };
+  pop.style.left = (rect.left + rect.width / 2) + 'px';
+  pop.style.top = rect.top + 'px';
+  document.body.appendChild(pop);
+  setTimeout(() => pop.remove(), 1000);
+}
+
+function spawnParticles(refEl) {
+  const emojis = ['✨', '🌟', '💫', '⭐', '🎉'];
+  const rect = refEl ? refEl.getBoundingClientRect() : { left: window.innerWidth / 2, top: window.innerHeight / 2 };
+  for (let i = 0; i < 5; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    const angle = (i / 5) * 360;
+    const dist = 50 + Math.random() * 50;
+    p.style.setProperty('--tx', Math.cos(angle * Math.PI / 180) * dist + 'px');
+    p.style.setProperty('--ty', Math.sin(angle * Math.PI / 180) * dist + 'px');
+    p.style.left = (rect.left + rect.width / 2) + 'px';
+    p.style.top = (rect.top + rect.height / 2) + 'px';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 800);
+  }
+}
+
+// ===== GAME OVER =====
+function endGame() {
+  isGameRunning = false;
+  stopGame();
+
+  const isNewRecord = score > highscore;
+  if (isNewRecord) {
+    highscore = score;
+    localStorage.setItem('ecohero_hs', highscore);
+  }
+
+  document.getElementById('final-score').textContent = score;
+  document.getElementById('final-level').textContent = level;
+  document.getElementById('final-correct').textContent = totalCorrect;
+  document.getElementById('final-wrong').textContent = totalWrong;
+  document.getElementById('final-hs').textContent = highscore;
+  document.getElementById('new-record').style.display = isNewRecord ? 'block' : 'none';
+
+  showScreen('gameover-screen');
+}
+
+// Start HUD on load
+updateHUD();
+</script>
+</body>
+</html>
